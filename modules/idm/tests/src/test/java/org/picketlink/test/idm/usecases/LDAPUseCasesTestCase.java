@@ -21,6 +21,7 @@ package org.picketlink.test.idm.usecases;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
@@ -142,15 +143,22 @@ public class LDAPUseCasesTestCase {
         Assert.assertEquals("John", john.getAttribute("fooFirstName").getValue());
         Assert.assertNotNull(john.getCreatedDate());
         Assert.assertNotNull(john.getAttribute("modifyDate"));
+
+        identityManager.remove(john);
+        Assert.assertNull(BasicModel.getUser(identityManager, "john"));
     }
 
     private PartitionManager getPartitionManager() {
+        Properties connectionProps = new Properties();
+        connectionProps.put("com.sun.jndi.ldap.connect.pool", "true");
+
         IdentityConfigurationBuilder builder = new IdentityConfigurationBuilder();
 
         builder
             .named(SIMPLE_LDAP_STORE_CONFIG)
                 .stores()
                     .ldap()
+                        .connectionProperties(connectionProps)
                         .baseDN(embeddedServer.getBaseDn())
                         .bindDN(embeddedServer.getBindDn())
                         .bindCredential(embeddedServer.getBindCredential())
